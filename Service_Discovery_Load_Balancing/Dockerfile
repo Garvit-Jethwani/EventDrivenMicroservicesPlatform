@@ -1,0 +1,3 @@
+
+FROM consul
+EXPOSE 8500
