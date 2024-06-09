@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/confluentinc/confluent-kafka-go v1.9.2
+	github.com/gorilla/mux v1.8.1
 	github.com/nats-io/nats.go v1.35.0
 )
 

@@ -1,7 +1,9 @@
 package config
 
 import (
+	"errors"
 	"os"
+	"strings"
 )
 
 type Config struct {
@@ -22,6 +24,9 @@ func LoadConfig() (*Config, error) {
 	natsClusterID := os.Getenv("NATS_CLUSTER_ID")
 
 	// Validate and parse configuration values
+	if httpAddress == "" || eventStore == "" {
+		return nil, errors.New("required environment variables HTTP_ADDRESS or EVENT_STORE are missing")
+	}
 
 	return &Config{
 		HTTPAddress:   httpAddress,
@@ -33,8 +38,10 @@ func LoadConfig() (*Config, error) {
 	}, nil
 }
 
+// parseKafkaBrokers splits a comma-separated brokers list into a slice of strings
 func parseKafkaBrokers(brokersList string) []string {
-	// Parse comma-separated Kafka broker list
-	// ...
-	return nil
+	if brokersList == "" {
+		return nil
+	}
+	return strings.Split(brokersList, ",")
 }
