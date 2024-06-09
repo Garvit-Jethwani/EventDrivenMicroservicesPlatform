@@ -31,7 +31,7 @@ func NewKafkaStore(brokers []string, topic string) (*KafkaStore, error) {
 		"bootstrap.servers":    brokerList,
 		"group.id":             "event-consumer-group",
 		"auto.offset.reset":    "earliest",
-		"enable.auto.commit":   false, // Disable automatic commit
+		"enable.auto.commit":   false, // Disable automatic offset commit
 		"session.timeout.ms":   6000,
 		"enable.partition.eof": true,
 	})
@@ -89,7 +89,7 @@ func (k *KafkaStore) Get(eventID string) (models.Event, error) {
 		}
 
 		if event.ID == eventID {
-			// Commit the offset for this message
+			// Commit the offset for this message after processing
 			_, commitErr := k.consumer.CommitMessage(msg)
 			if commitErr != nil {
 				log.Printf("Failed to commit message: %v", commitErr)
@@ -106,7 +106,6 @@ func (k *KafkaStore) List(offset, limit int) ([]models.Event, error) {
 	var events []models.Event
 	var count int
 
-PartLoop:
 	for {
 		msg, err := k.consumer.ReadMessage(10 * time.Second)
 		if err != nil {
@@ -115,10 +114,6 @@ PartLoop:
 				break
 			}
 			return nil, err
-		}
-
-		for _, p := range msg.TopicPartition.Partition {
-			log.Printf("Partition %d\n", p)
 		}
 
 		if count < offset {
@@ -136,7 +131,7 @@ PartLoop:
 		events = append(events, event)
 		count++
 
-		// Commit the offset for this message
+		// Commit the offset for the message after processing
 		_, commitErr := k.consumer.CommitMessage(msg)
 		if commitErr != nil {
 			log.Printf("Failed to commit message: %v", commitErr)
@@ -174,12 +169,13 @@ func (k *KafkaStore) GetEventStatus(eventID string) (models.EventStatus, error) 
 		}
 
 		if event.ID == eventID {
-			// Commit the offset for this message
+			// Commit the offset for the message after processing
 			_, commitErr := k.consumer.CommitMessage(msg)
 			if commitErr != nil {
 				log.Printf("Failed to commit message: %v", commitErr)
 				return models.EventStatus{}, commitErr
 			}
+
 			return models.EventStatus{
 				ID:     eventID,
 				Status: models.StatusProcessed,
