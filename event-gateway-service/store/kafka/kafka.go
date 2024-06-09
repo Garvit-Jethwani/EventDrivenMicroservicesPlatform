@@ -28,10 +28,12 @@ func NewKafkaStore(brokers []string, topic string) (*KafkaStore, error) {
 	}
 
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers":  brokerList,
-		"group.id":           "event-consumer-group",
-		"auto.offset.reset":  "earliest",
-		"session.timeout.ms": 6000,
+		"bootstrap.servers":    brokerList,
+		"group.id":             "event-consumer-group",
+		"auto.offset.reset":    "earliest",
+		"enable.auto.commit":   false, // Disable automatic commit
+		"session.timeout.ms":   6000,
+		"enable.partition.eof": true,
 	})
 	if err != nil {
 		return nil, err
@@ -87,6 +89,13 @@ func (k *KafkaStore) Get(eventID string) (models.Event, error) {
 		}
 
 		if event.ID == eventID {
+			// Commit the offset for this message
+			_, commitErr := k.consumer.CommitMessage(msg)
+			if commitErr != nil {
+				log.Printf("Failed to commit message: %v", commitErr)
+				return event, commitErr
+			}
+
 			return event, nil
 		}
 	}
@@ -97,6 +106,7 @@ func (k *KafkaStore) List(offset, limit int) ([]models.Event, error) {
 	var events []models.Event
 	var count int
 
+PartLoop:
 	for {
 		msg, err := k.consumer.ReadMessage(10 * time.Second)
 		if err != nil {
@@ -105,6 +115,10 @@ func (k *KafkaStore) List(offset, limit int) ([]models.Event, error) {
 				break
 			}
 			return nil, err
+		}
+
+		for _, p := range msg.TopicPartition.Partition {
+			log.Printf("Partition %d\n", p)
 		}
 
 		if count < offset {
@@ -121,6 +135,12 @@ func (k *KafkaStore) List(offset, limit int) ([]models.Event, error) {
 
 		events = append(events, event)
 		count++
+
+		// Commit the offset for this message
+		_, commitErr := k.consumer.CommitMessage(msg)
+		if commitErr != nil {
+			log.Printf("Failed to commit message: %v", commitErr)
+		}
 
 		if count >= offset+limit {
 			break
@@ -154,6 +174,12 @@ func (k *KafkaStore) GetEventStatus(eventID string) (models.EventStatus, error) 
 		}
 
 		if event.ID == eventID {
+			// Commit the offset for this message
+			_, commitErr := k.consumer.CommitMessage(msg)
+			if commitErr != nil {
+				log.Printf("Failed to commit message: %v", commitErr)
+				return models.EventStatus{}, commitErr
+			}
 			return models.EventStatus{
 				ID:     eventID,
 				Status: models.StatusProcessed,
