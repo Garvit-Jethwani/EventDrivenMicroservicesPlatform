@@ -1,67 +1,85 @@
 package events
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"strings"
+
 	"github.com/Garvit-Jethwani/notification-service/models"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
+// EventConsumer is an interface for consuming events from an event store.
 type EventConsumer interface {
-	Start() error
-	Close() error
 	Consume() (<-chan models.Event, error)
+	Close() error
 }
 
 type KafkaConsumer struct {
-	consumer  *kafka.Consumer
-	eventChan chan models.Event
+	consumer *kafka.Consumer
+	topic    string
 }
 
-func NewKafkaConsumer(brokers []string, groupID, topics string) (*KafkaConsumer, error) {
-	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": brokers,
+func NewKafkaConsumer(brokers []string, groupID, topic string) (*KafkaConsumer, error) {
+	brokersList := strings.Join(brokers, ",")
+	configMap := &kafka.ConfigMap{
+		"bootstrap.servers": brokersList,
 		"group.id":          groupID,
 		"auto.offset.reset": "earliest",
-	})
+	}
+
+	c, err := kafka.NewConsumer(configMap)
 	if err != nil {
 		return nil, err
 	}
 
-	consumer.SubscribeTopics([]string{topics}, nil)
+	err = c.SubscribeTopics([]string{topic}, nil)
+	if err != nil {
+		// Close the consumer if subscription fails
+		c.Close()
+		return nil, err
+	}
 
 	return &KafkaConsumer{
-		consumer:  consumer,
-		eventChan: make(chan models.Event),
+		consumer: c,
+		topic:    topic,
 	}, nil
 }
+func (k *KafkaConsumer) Consume() (<-chan models.Event, error) {
+	eventChan := make(chan models.Event)
 
-func (k *KafkaConsumer) Start() error {
-	go k.consumeEvents()
-	return nil
+	// Check if k.consumer is nil before starting the goroutine
+	if k.consumer == nil {
+		return nil, fmt.Errorf("kafka consumer is not initialized")
+	}
+
+	go func() {
+		for {
+			ev, err := k.consumer.ReadMessage(-1)
+			if err != nil {
+				// Handle error
+				log.Printf("Error reading message from Kafka: %v", err)
+				continue
+			}
+
+			var event models.Event
+			err = json.Unmarshal(ev.Value, &event)
+			if err != nil {
+				log.Printf("Error unmarshalling event: %v", err)
+				continue
+			}
+
+			eventChan <- event
+		}
+	}()
+
+	return eventChan, nil
 }
 
 func (k *KafkaConsumer) Close() error {
-	return k.consumer.Close()
-}
-
-func (k *KafkaConsumer) Consume() (<-chan models.Event, error) {
-	return k.eventChan, nil
-}
-
-func (k *KafkaConsumer) consumeEvents() {
-	for {
-		ev, err := k.consumer.ReadMessage(-1)
-		if err != nil {
-			// Handle error
-			continue
-		}
-
-		event := models.Event{
-			ID:        string(ev.Key),
-			Type:      *ev.TopicPartition.Topic,
-			Payload:   ev.Value,
-			Timestamp: ev.Timestamp,
-		}
-
-		k.eventChan <- event
+	if k.consumer == nil {
+		return nil // Return without error if consumer is nil
 	}
+	return k.consumer.Close()
 }

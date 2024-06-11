@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"strings"
 
 	"github.com/Garvit-Jethwani/notification-service/config"
 	"github.com/Garvit-Jethwani/notification-service/events"
@@ -16,8 +15,10 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	brokers := strings.Split(cfg.EventStoreConfig["brokers"], ",")
-	consumer, err := events.NewKafkaConsumer(brokers, cfg.EventStoreConfig["group.id"], cfg.EventStoreConfig["topic"])
+	consumer, err := events.NewKafkaConsumer(cfg.KafkaBrokers, "notification-service-group", cfg.KafkaTopic)
+	if err != nil {
+		log.Fatalf("Failed to create Kafka consumer: %v", err)
+	}
 	defer consumer.Close()
 
 	// Create notification service

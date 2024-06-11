@@ -2,20 +2,26 @@ package config
 
 import (
 	"os"
+	"strings"
 )
 
 type Config struct {
-	EventStore       string
-	EventStoreConfig map[string]string
+	EventStore   string
+	KafkaBrokers []string
+	KafkaTopic   string
+	HTTPAddress  string
 }
 
 func LoadConfig() (*Config, error) {
 	eventStore := os.Getenv("EVENT_STORE")
-	eventStoreConfig := make(map[string]string)
-	// Load event store configuration from environment variables
+	kafkaBrokers := strings.Split(os.Getenv("KAFKA_BROKERS"), ",")
+	kafkaTopic := os.Getenv("KAFKA_TOPIC")
+	httpAddress := os.Getenv("HTTP_ADDRESS")
 
 	return &Config{
-		EventStore:       eventStore,
-		EventStoreConfig: eventStoreConfig,
+		EventStore:   eventStore,
+		KafkaBrokers: kafkaBrokers,
+		KafkaTopic:   kafkaTopic,
+		HTTPAddress:  httpAddress,
 	}, nil
 }
