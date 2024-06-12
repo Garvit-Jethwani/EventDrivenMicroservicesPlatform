@@ -1,15 +1,19 @@
 module github.com/Garvit-Jethwani/database-service
 
-go 1.21.3
+go 1.21
 
 require (
-	google.golang.org/grpc v1.64.0
-	google.golang.org/protobuf v1.34.1
+	github.com/go-sql-driver/mysql v1.6.0
+	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/lib/pq v1.10.4
+	google.golang.org/grpc v1.41.0
+	google.golang.org/protobuf v1.27.1
 )
 
 require (
-	golang.org/x/net v0.23.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
+	github.com/golang/protobuf v1.5.0 // indirect
+	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
+	golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd // indirect
+	golang.org/x/text v0.3.0 // indirect
+	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 )

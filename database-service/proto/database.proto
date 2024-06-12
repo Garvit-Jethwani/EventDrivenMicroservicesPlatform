@@ -1,36 +1,31 @@
 syntax = "proto3";
 
-package proto;
+package database;
+option go_package = "github.com/Garvit-Jethwani/database-service/proto;proto";
 
-option go_package = "github.com/Garvit-Jethwani/database-service/proto";
-
-// DatabaseService definition
 service DatabaseService {
-    rpc ExecuteQuery (QueryRequest) returns (QueryResponse) {}
-    rpc ExecuteCommand (CommandRequest) returns (CommandResponse) {}
+  rpc Query(QueryRequest) returns (QueryResponse);
+  rpc Command(CommandRequest) returns (CommandResponse);
 }
 
-// Request message containing the query to be executed
 message QueryRequest {
-    string databaseName = 1;
-    string query = 2;
-    // Additional query parameters (projection fields, filters, etc.)
+  string sql = 1;
+  repeated string params = 2;
 }
 
-// Response message containing the results of the query
 message QueryResponse {
-    bytes result = 1;
+  repeated Row rows = 1;
 }
 
-// Request message containing the command to be executed
+message Row {
+  map<string, string> columns = 1;
+}
+
 message CommandRequest {
-    string databaseName = 1;
-    string command = 2;
-    bytes payload = 3;
+  string sql = 1;
+  repeated string params = 2;
 }
 
-// Response message containing the results of the command execution
 message CommandResponse {
-    bool success = 1;
-    string errorMessage = 2;
+  int64 rows_affected = 1;
 }

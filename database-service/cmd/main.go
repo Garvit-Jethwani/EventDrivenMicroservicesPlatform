@@ -1,42 +1,54 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	"os"
 
 	"github.com/Garvit-Jethwani/database-service/config"
 	"github.com/Garvit-Jethwani/database-service/database"
+	"github.com/Garvit-Jethwani/database-service/grpcserver"
 	"github.com/Garvit-Jethwani/database-service/proto"
+	"google.golang.org/grpc"
 )
 
 func main() {
 	// Load configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		log.Fatalf("could not load config: %v", err)
 	}
 
-	// Create database service
-	databaseService, err := database.NewDatabaseService(cfg)
+	// Initialize PostgreSQL if configured
+	if postgresURL := os.Getenv("POSTGRES_URL"); postgresURL != "" {
+		if err := database.InitPostgres(postgresURL); err != nil {
+			log.Fatalf("could not connect to PostgreSQL: %v", err)
+		}
+	}
+
+	// Initialize MySQL if configured
+	if mysqlURL := os.Getenv("MYSQL_URL"); mysqlURL != "" {
+		if err := database.InitMySQL(mysqlURL); err != nil {
+			log.Fatalf("could not connect to MySQL: %v", err)
+		}
+	}
+
+	// Create a gRPC server instance
+	grpcServer := grpc.NewServer()
+
+	// Register database service
+	databaseServer := &grpcserver.Server{DB: database.GetDB()}
+	proto.RegisterDatabaseServiceServer(grpcServer, databaseServer)
+
+	// Start the gRPC server
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.GRPCPort))
 	if err != nil {
-		log.Fatalf("Failed to create database service: %v", err)
+		log.Fatalf("failed to listen: %v", err)
 	}
+	log.Printf("Server is ready to handle requests at %s", lis.Addr().String())
 
-	// Create gRPC server
-	lis, err := net.Listen("tcp", cfg.GRPCAddress)
-	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
-	}
-
-	s := grpc.NewServer()
-	proto.RegisterDatabaseServiceServer(s, databaseService)
-	reflection.Register(s)
-
-	log.Printf("Starting Database Service on %s", cfg.GRPCAddress)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
 	}
 }

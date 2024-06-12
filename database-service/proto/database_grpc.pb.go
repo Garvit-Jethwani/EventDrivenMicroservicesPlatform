@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	DatabaseService_ExecuteQuery_FullMethodName   = "/proto.DatabaseService/ExecuteQuery"
-	DatabaseService_ExecuteCommand_FullMethodName = "/proto.DatabaseService/ExecuteCommand"
+	DatabaseService_Query_FullMethodName   = "/database.DatabaseService/Query"
+	DatabaseService_Command_FullMethodName = "/database.DatabaseService/Command"
 )
 
 // DatabaseServiceClient is the client API for DatabaseService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DatabaseServiceClient interface {
-	ExecuteQuery(ctx context.Context, in *QueryRequest, opts ...grpc.CallOption) (*QueryResponse, error)
-	ExecuteCommand(ctx context.Context, in *CommandRequest, opts ...grpc.CallOption) (*CommandResponse, error)
+	Query(ctx context.Context, in *QueryRequest, opts ...grpc.CallOption) (*QueryResponse, error)
+	Command(ctx context.Context, in *CommandRequest, opts ...grpc.CallOption) (*CommandResponse, error)
 }
 
 type databaseServiceClient struct {
@@ -39,18 +39,18 @@ func NewDatabaseServiceClient(cc grpc.ClientConnInterface) DatabaseServiceClient
 	return &databaseServiceClient{cc}
 }
 
-func (c *databaseServiceClient) ExecuteQuery(ctx context.Context, in *QueryRequest, opts ...grpc.CallOption) (*QueryResponse, error) {
+func (c *databaseServiceClient) Query(ctx context.Context, in *QueryRequest, opts ...grpc.CallOption) (*QueryResponse, error) {
 	out := new(QueryResponse)
-	err := c.cc.Invoke(ctx, DatabaseService_ExecuteQuery_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, DatabaseService_Query_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *databaseServiceClient) ExecuteCommand(ctx context.Context, in *CommandRequest, opts ...grpc.CallOption) (*CommandResponse, error) {
+func (c *databaseServiceClient) Command(ctx context.Context, in *CommandRequest, opts ...grpc.CallOption) (*CommandResponse, error) {
 	out := new(CommandResponse)
-	err := c.cc.Invoke(ctx, DatabaseService_ExecuteCommand_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, DatabaseService_Command_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -61,8 +61,8 @@ func (c *databaseServiceClient) ExecuteCommand(ctx context.Context, in *CommandR
 // All implementations must embed UnimplementedDatabaseServiceServer
 // for forward compatibility
 type DatabaseServiceServer interface {
-	ExecuteQuery(context.Context, *QueryRequest) (*QueryResponse, error)
-	ExecuteCommand(context.Context, *CommandRequest) (*CommandResponse, error)
+	Query(context.Context, *QueryRequest) (*QueryResponse, error)
+	Command(context.Context, *CommandRequest) (*CommandResponse, error)
 	mustEmbedUnimplementedDatabaseServiceServer()
 }
 
@@ -70,11 +70,11 @@ type DatabaseServiceServer interface {
 type UnimplementedDatabaseServiceServer struct {
 }
 
-func (UnimplementedDatabaseServiceServer) ExecuteQuery(context.Context, *QueryRequest) (*QueryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ExecuteQuery not implemented")
+func (UnimplementedDatabaseServiceServer) Query(context.Context, *QueryRequest) (*QueryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Query not implemented")
 }
-func (UnimplementedDatabaseServiceServer) ExecuteCommand(context.Context, *CommandRequest) (*CommandResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ExecuteCommand not implemented")
+func (UnimplementedDatabaseServiceServer) Command(context.Context, *CommandRequest) (*CommandResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Command not implemented")
 }
 func (UnimplementedDatabaseServiceServer) mustEmbedUnimplementedDatabaseServiceServer() {}
 
@@ -89,38 +89,38 @@ func RegisterDatabaseServiceServer(s grpc.ServiceRegistrar, srv DatabaseServiceS
 	s.RegisterService(&DatabaseService_ServiceDesc, srv)
 }
 
-func _DatabaseService_ExecuteQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DatabaseService_Query_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(QueryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DatabaseServiceServer).ExecuteQuery(ctx, in)
+		return srv.(DatabaseServiceServer).Query(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DatabaseService_ExecuteQuery_FullMethodName,
+		FullMethod: DatabaseService_Query_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DatabaseServiceServer).ExecuteQuery(ctx, req.(*QueryRequest))
+		return srv.(DatabaseServiceServer).Query(ctx, req.(*QueryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DatabaseService_ExecuteCommand_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DatabaseService_Command_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CommandRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DatabaseServiceServer).ExecuteCommand(ctx, in)
+		return srv.(DatabaseServiceServer).Command(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DatabaseService_ExecuteCommand_FullMethodName,
+		FullMethod: DatabaseService_Command_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DatabaseServiceServer).ExecuteCommand(ctx, req.(*CommandRequest))
+		return srv.(DatabaseServiceServer).Command(ctx, req.(*CommandRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -129,16 +129,16 @@ func _DatabaseService_ExecuteCommand_Handler(srv interface{}, ctx context.Contex
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var DatabaseService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.DatabaseService",
+	ServiceName: "database.DatabaseService",
 	HandlerType: (*DatabaseServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ExecuteQuery",
-			Handler:    _DatabaseService_ExecuteQuery_Handler,
+			MethodName: "Query",
+			Handler:    _DatabaseService_Query_Handler,
 		},
 		{
-			MethodName: "ExecuteCommand",
-			Handler:    _DatabaseService_ExecuteCommand_Handler,
+			MethodName: "Command",
+			Handler:    _DatabaseService_Command_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
