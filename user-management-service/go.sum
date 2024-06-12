@@ -1,0 +1,7 @@
+
+github.com/gorilla/mux v1.8.0 h1:YtPYdb9VPvXexuodQ9NCK0/seQHpMJtNdinHl68iQQo=
+github.com/gorilla/mux v1.8.0/go.mod h1:BBpX9EvESIvdjkEuXD127lA3cCesKSUyTebPUZgx0PI=
+github.com/kelseyhightower/envconfig v1.4.0 h1:O7BWhHYqXNqDcTayAFxlXx96S+mxX6IoHlJ/H+psnng=
+github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:v4YsziNv62CDYm5PMoj6iCdJirgZBq3Oy5icG8AEwMo=
+google.golang.org/grpc v1.39.0 h1:ZPTF2rnkV+/XPbcsuzA2Cq8ovJhDN+jmFBU3ius64sE=
+google.golang.org/grpc v1.39.0/go.mod h1:MFzNf0mGgENK8U1iXJ89PsbGkOuFe2CmbgyA5LRpXSc=
