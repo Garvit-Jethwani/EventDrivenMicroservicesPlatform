@@ -1,0 +1,9 @@
+
+github.com/gorilla/mux v1.8.0 h1:YtPYdb9VPvXexuodQ9NCK0/seQHpMJtNdinHl68iQQo=
+github.com/gorilla/mux v1.8.0/go.mod h1:BBpX9EvESIvdjkEuXD127lA3cCesKSUyTebPUZgx0PI=
+github.com/kelseyhightower/envconfig v1.4.0 h1:O7BWhHYqXNqDcTayAFxlXx96S+mxX6IoHlJ/H+psnng=
+github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:v4YsziNv62CDYm5PMoj6iCdJirgZBq3Oy5icG8AEwMo=
+github.com/segmentio/kafka-go v0.4.27 h1:4Jt8CI662iwYVhc9NdWLLckJLoOy5DocfEZiUdoI9ks=
+github.com/segmentio/kafka-go v0.4.27/go.mod h1:ZRCFDh4MLqwF+wCGxrhzEurCYEb9PtZW7NAkLnVA4Sc=
+github.com/lib/pq v1.10.4 h1:8BA726djZSWuKw7fB/xa7nShrLwa3lXdMPChnNbnv4c=
+github.com/lib/pq v1.10.4/go.mod h1:VUSpNZbHbDPW/qjzSzkeL0xLUgibyDR2UGcy6iTpSJM=
