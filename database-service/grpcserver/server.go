@@ -15,6 +15,9 @@ type Server struct {
 }
 
 func (s *Server) Query(ctx context.Context, req *proto.QueryRequest) (*proto.QueryResponse, error) {
+	if s.DB == nil {
+		return nil, fmt.Errorf("database connection is not initialized")
+	}
 	// Convert []string to []interface{} for database query
 	params := make([]interface{}, len(req.Params))
 	for i, param := range req.Params {
@@ -43,6 +46,9 @@ func (s *Server) Query(ctx context.Context, req *proto.QueryRequest) (*proto.Que
 }
 
 func (s *Server) Command(ctx context.Context, req *proto.CommandRequest) (*proto.CommandResponse, error) {
+	if s.DB == nil {
+		return nil, fmt.Errorf("database connection is not initialized")
+	}
 	// Convert []string to []interface{} for database command
 	params := make([]interface{}, len(req.Params))
 	for i, param := range req.Params {

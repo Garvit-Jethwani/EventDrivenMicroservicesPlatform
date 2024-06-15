@@ -34,11 +34,17 @@ func main() {
 		}
 	}
 
+	// Get the initialized DB
+	db := database.GetDB()
+	if db == nil {
+		log.Fatalf("no database initialized")
+	}
+
 	// Create a gRPC server instance
 	grpcServer := grpc.NewServer()
 
 	// Register database service
-	databaseServer := &grpcserver.Server{DB: database.GetDB()}
+	databaseServer := &grpcserver.Server{DB: db}
 	proto.RegisterDatabaseServiceServer(grpcServer, databaseServer)
 
 	// Start the gRPC server

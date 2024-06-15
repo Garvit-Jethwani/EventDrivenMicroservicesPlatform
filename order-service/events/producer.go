@@ -1,46 +1,38 @@
 package events
 
-import (
-	"encoding/json"
-	"log"
+// const (
+// 	topic     = "order_events"
+// 	partition = 0
+// )
 
-	"github.com/Garvit-Jethwani/order-serice/models"
-	"github.com/segmentio/kafka-go"
-)
+// var writer *kafka.Writer
 
-const (
-	topic     = "order_events"
-	partition = 0
-)
+// func InitEventProducer(brokers []string) {
+// 	writer = &kafka.Writer{
+// 		Addr:     kafka.TCP(brokers...),
+// 		Topic:    topic,
+// 		Balancer: &kafka.LeastBytes{},
+// 	}
+// }
 
-var writer *kafka.Writer
+// func ProduceOrderCreatedEvent(order *models.Order) error {
+// 	event := map[string]interface{}{
+// 		"event": "order_created",
+// 		"data":  order,
+// 	}
+// 	payload, err := json.Marshal(event)
+// 	if err != nil {
+// 		return err
+// 	}
 
-func InitEventProducer(brokers []string) {
-	writer = &kafka.Writer{
-		Addr:     kafka.TCP(brokers...),
-		Topic:    topic,
-		Balancer: &kafka.LeastBytes{},
-	}
-}
+// 	err = writer.WriteMessages(nil, kafka.Message{
+// 		Value: payload,
+// 	})
+// 	if err != nil {
+// 		log.Printf("could not write message: %v", err)
+// 		return err
+// 	}
 
-func ProduceOrderCreatedEvent(order *models.Order) error {
-	event := map[string]interface{}{
-		"event": "order_created",
-		"data":  order,
-	}
-	payload, err := json.Marshal(event)
-	if err != nil {
-		return err
-	}
-
-	err = writer.WriteMessages(nil, kafka.Message{
-		Value: payload,
-	})
-	if err != nil {
-		log.Printf("could not write message: %v", err)
-		return err
-	}
-
-	log.Printf("order created event produced: %v", order)
-	return nil
-}
+// 	log.Printf("order created event produced: %v", order)
+// 	return nil
+// }

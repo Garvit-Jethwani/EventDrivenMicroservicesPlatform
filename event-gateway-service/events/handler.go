@@ -2,6 +2,7 @@ package events
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -28,7 +29,7 @@ func (h *EventHandler) IngestEvent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
-
+	fmt.Println("publishing the event", event)
 	eventID, err := h.eventStore.Publish(event)
 	if err != nil {
 		http.Error(w, "Failed to publish event", http.StatusInternalServerError)

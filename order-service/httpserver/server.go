@@ -4,16 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
-	"github.com/Garvit-Jethwani/order-serice/config"
-	"github.com/Garvit-Jethwani/order-serice/database"
-	"github.com/Garvit-Jethwani/order-serice/events"
-	"github.com/Garvit-Jethwani/order-serice/models"
+	"github.com/Garvit-Jethwani/order-service/config"
+	"github.com/Garvit-Jethwani/order-service/database"
+	"github.com/Garvit-Jethwani/order-service/events"
+	"github.com/Garvit-Jethwani/order-service/models"
 	"github.com/gorilla/mux"
 )
 
@@ -38,12 +39,12 @@ func NewServer(cfg *config.Config) *Server {
 
 func (s *Server) Start() error {
 	// Initialize database
-	if err := database.InitDatabase(os.Getenv("DATABASE_URL")); err != nil {
-		log.Fatalf("could not connect to database: %v", err)
-	}
+	// if err := database.InitDatabase(os.Getenv("DATABASE_URL")); err != nil {
+	// 	log.Fatalf("could not connect to database: %v", err)
+	// }
 
 	// Initialize event producer
-	events.InitEventProducer([]string{os.Getenv("EVENT_STORE_URL")})
+	//	events.InitEventProducer([]string{os.Getenv("EVENT_STORE_URL")})
 
 	// Start the server in a new goroutine
 	go func() {
@@ -68,21 +69,23 @@ func (s *Server) Start() error {
 }
 
 func createOrderHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("createOrderHandler")
 	var order models.Order
 	if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	fmt.Println(order)
 	if err := database.CreateOrder(&order); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if err := events.ProduceOrderCreatedEvent(&order); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// if err := events.ProduceOrderCreatedEvent(&order); err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+	events.HandleOrderCreatedEvent(order.ID)
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(order)

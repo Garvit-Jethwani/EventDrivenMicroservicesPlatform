@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -37,6 +38,7 @@ func GetDB() *sql.DB {
 	if mysqlDB != nil {
 		return mysqlDB
 	}
+	log.Println("no database initialized")
 	return nil
 }
 

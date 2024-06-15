@@ -12,6 +12,7 @@ type Config struct {
 	HTTPAddress  string
 }
 
+// should we be calling /events microservice for updates
 func LoadConfig() (*Config, error) {
 	eventStore := os.Getenv("EVENT_STORE")
 	kafkaBrokers := strings.Split(os.Getenv("KAFKA_BROKERS"), ",")
