@@ -1,8 +1,0 @@
-
-dashboards:
-  - title: "Event Gateway Monitoring"
-    rows: 
-      -  panels:
-          - title: "RP Calls"
-            type: "graph"
-            datasource: "Prometheus"
